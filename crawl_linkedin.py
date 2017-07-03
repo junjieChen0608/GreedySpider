@@ -6,6 +6,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 
 
+"""
+populate the result set with coarse-grain filtered result
+for further evaluation
+"""
 def coarse_filter(potential_divs, result_set, fullname):
     for div in potential_divs:
         inner_anchor = div.find_element(By.TAG_NAME, "a")
@@ -17,16 +21,18 @@ def coarse_filter(potential_divs, result_set, fullname):
         inner_span_text = inner_span.text
         if fullname in inner_span_text.lower().replace(" ", ""):
             result_set.add(profile_link)
-            # print(inner_span_text + ":")
-            # print(profile_link + "\n")
+    print("Coarse-grain filter: " + str(len(result_set)) + " candidates survived from coarse-grain filter")
 
 
+"""
+fine-grain filter that evaluates accuracy score of all candidate profile links
+"""
 def fine_filter(driver, result_set):
 
     """
     need to compare school, major, grad year, each worth 1 points
     """
-    print("Checking " + str(len(result_set)) + " potential profile links...\n")
+    print("Fine-grain filter: checking " + str(len(result_set)) + " potential profile links...\n")
     for link in result_set:
         print("Clicked: " + link)
         driver.get(link)
@@ -41,23 +47,25 @@ def fine_filter(driver, result_set):
             )
         except TimeoutException:
             print("No education data found!!")
-            return
+            print("Accuracy " + str(score) + "\n" + link)
+            continue
 
         print(str(len(education_info)) + " education data found")
         for education in education_info:
             # find school name
             school = education.find_element(By.TAG_NAME, "h3")
             school_name = school.text
+            print(school_name.lower().replace(" ", ""))
 
             # find major info
             major_info = education.find_elements(By.CLASS_NAME, "pv-entity__comma-item")
-            print(school_name)
             for major in major_info:
                 print(major.text)
 
             # find graduation year
             grad_year = education.find_element(By.XPATH, "//time[2]")
-            print("graduation year " + grad_year.text)
+            print("graduation year " + grad_year.text +
+                  "\n----------------------------------------------")
 
 
 
@@ -65,7 +73,7 @@ def fine_filter(driver, result_set):
 def crawl_linkedin():
 
     """
-    basic housekeeping
+    web driver set up
     """
     print("Setting up driver...\n")
 
@@ -76,8 +84,8 @@ def crawl_linkedin():
     driver = webdriver.PhantomJS(phantomjs_path)
 
     driver.maximize_window()
-    first_name = "shuaixiang"
-    last_name = "zhang"
+    first_name = "junjie"
+    last_name = "chen"
     region = "buffalo"
 
     page = "https://www.linkedin.com"
@@ -128,7 +136,7 @@ def crawl_linkedin():
         print("No match!!")
         return
 
-    print("Coarse grain filter from " + str(len(potential_divs)) + " potential candidate...\n")
+    print(str(len(potential_divs)) + " potential candidate entering coarse-grain filter...\n")
     result_set = set()
 
     """
