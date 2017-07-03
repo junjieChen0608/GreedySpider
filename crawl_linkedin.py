@@ -65,8 +65,8 @@ def crawl_linkedin():
     # driver = webdriver.PhantomJS(phantomjs_path)
 
     driver.maximize_window()
-    first_name = "daniel"
-    last_name = "romero"
+    first_name = ""
+    last_name = ""
     region = "buffalo"
 
     # page = compose_url(first_name, last_name)
@@ -78,8 +78,8 @@ def crawl_linkedin():
     simulate login
     """
     print("Log-in landing page...\n")
-    email = "371000549@qq.com"
-    password = "1313123"
+    email = ""
+    password = ""
     # automated login process
     login_email = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CLASS_NAME, "login-email"))
