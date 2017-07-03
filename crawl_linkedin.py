@@ -31,22 +31,33 @@ def fine_filter(driver, result_set):
         print("Clicked: " + link)
         driver.get(link)
         score = 0
+
         # find education data
-        degree_info = None
+        education_info = None
         try:
-            degree_info = WebDriverWait(driver, 5).until(
-                    EC.presence_of_all_elements_located( (By.XPATH, """//div[@class="pv-entity__degree-info"]""") )
+            education_info = WebDriverWait(driver, 10).until(
+                EC.presence_of_all_elements_located( (By.XPATH,
+            """//a[@data-control-name="background_details_school"]""") )
             )
         except TimeoutException:
             print("No education data found!!")
-            continue
-        print(str(len(degree_info)) + " education data found")
-        # find school name and major
-        school_name = ""
-        major = ""
-        for degree in degree_info:
-            school_name = degree.find_element(By.TAG_NAME, "h3")
-            print(school_name.text)
+            return
+
+        print(str(len(education_info)) + " education data found")
+        for education in education_info:
+            # find school name
+            school = education.find_element(By.TAG_NAME, "h3")
+            school_name = school.text
+
+            # find major info
+            major_info = education.find_elements(By.CLASS_NAME, "pv-entity__comma-item")
+            print(school_name)
+            for major in major_info:
+                print(major.text)
+
+            # find graduation year
+            grad_year = education.find_element(By.XPATH, "//time[2]")
+            print("graduation year " + grad_year.text)
 
 
 
@@ -58,18 +69,17 @@ def crawl_linkedin():
     """
     print("Setting up driver...\n")
 
-    chrome_path = r"C:\Zone\Chrome Webdriver\chromedriver.exe"
-    driver = webdriver.Chrome(chrome_path)
+    # chrome_path = r"C:\Zone\ChromeDriver\chromedriver.exe"
+    # driver = webdriver.Chrome(chrome_path)
 
-    # phantomjs_path = r"C:\Zone\PhantomJS\phantomjs-2.1.1-windows\bin\phantomjs.exe"
-    # driver = webdriver.PhantomJS(phantomjs_path)
+    phantomjs_path = r"C:\Zone\PhantomJS\phantomjs-2.1.1-windows\bin\phantomjs.exe"
+    driver = webdriver.PhantomJS(phantomjs_path)
 
     driver.maximize_window()
-    first_name = ""
-    last_name = ""
+    first_name = "shuaixiang"
+    last_name = "zhang"
     region = "buffalo"
 
-    # page = compose_url(first_name, last_name)
     page = "https://www.linkedin.com"
     driver.get(page)
     print("crawling: " + page + "\n")
@@ -79,7 +89,8 @@ def crawl_linkedin():
     """
     print("Log-in landing page...\n")
     email = "371000549@qq.com"
-    password = ""
+    password = "1313123"
+
     # automated login process
     login_email = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CLASS_NAME, "login-email"))
@@ -110,7 +121,7 @@ def crawl_linkedin():
     print("Waiting page to render...\n")
     potential_divs = None
     try:
-        potential_divs = WebDriverWait(driver, 5).until(
+        potential_divs = WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located( (By.XPATH, """//div[@class="search-result__info pt3 pb4 ph0"]""" ) )
         )
     except TimeoutException:
