@@ -28,7 +28,6 @@ def coarse_filter(potential_divs, result_set, fullname):
 fine-grain filter that evaluates accuracy score of all candidate profile links
 """
 def fine_filter(driver, result_set):
-
     """
     need to compare school, major, grad year, each worth 1 points
     """
@@ -43,11 +42,10 @@ def fine_filter(driver, result_set):
         try:
             education_info = WebDriverWait(driver, 10).until(
                 EC.presence_of_all_elements_located( (By.XPATH,
-            """//a[@data-control-name="background_details_school"]""") )
+            """//*[@data-control-name="background_details_school"]""") )
             )
         except TimeoutException:
-            print("No education data found!!")
-            print("Accuracy " + str(score) + "\n" + link)
+            print("No education data found!!\n----------------------------------------------")
             continue
 
         print(str(len(education_info)) + " education data found")
@@ -68,6 +66,42 @@ def fine_filter(driver, result_set):
                   "\n----------------------------------------------")
 
 
+def simulate_login(driver, email, password):
+    # automated login process
+    login_email = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "login-email"))
+    )
+    login_password = driver.find_element_by_class_name("login-password")
+    sign_in_btn = driver.find_element_by_id("login-submit")
+
+    # input credentials then log in
+    print("Inputting credentials...\n")
+    login_email.clear()
+    login_email.send_keys(email)
+    login_password.clear()
+    login_password.send_keys(password)
+    sign_in_btn.click()
+
+
+def star_search(driver, first_name, last_name, region="buffalo"):
+    search_bar = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, """//*[@class="ember-text-field ember-view"]"""))
+    )
+
+    search_bar.clear()
+    search_bar.send_keys(first_name + " " + last_name + " " + region)
+    search_bar.send_keys(Keys.RETURN)
+
+
+def wait_result(driver):
+    try:
+        potential_divs = WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located( (By.XPATH, """//div[@class="search-result__info pt3 pb4 ph0"]""" ) )
+        )
+        return potential_divs
+    except TimeoutException:
+        print("No match!!")
+        return []
 
 
 def crawl_linkedin():
@@ -75,18 +109,15 @@ def crawl_linkedin():
     """
     web driver set up
     """
-    print("Setting up driver...\n")
+    print("Setting up web driver...\n")
+    chrome_path = r"C:\Zone\ChromeDriver\chromedriver.exe"
+    driver = webdriver.Chrome(chrome_path)
 
-    # chrome_path = r"C:\Zone\ChromeDriver\chromedriver.exe"
-    # driver = webdriver.Chrome(chrome_path)
+    # phantomjs_path = r"C:\Zone\PhantomJS\phantomjs-2.1.1-windows\bin\phantomjs.exe"
+    # driver = webdriver.PhantomJS(phantomjs_path)
 
-    phantomjs_path = r"C:\Zone\PhantomJS\phantomjs-2.1.1-windows\bin\phantomjs.exe"
-    driver = webdriver.PhantomJS(phantomjs_path)
-
-    driver.maximize_window()
     first_name = "junjie"
     last_name = "chen"
-    region = "buffalo"
 
     page = "https://www.linkedin.com"
     driver.get(page)
@@ -98,50 +129,23 @@ def crawl_linkedin():
     print("Log-in landing page...\n")
     email = "371000549@qq.com"
     password = "1313123"
-
-    # automated login process
-    login_email = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "login-email"))
-    )
-    login_password = driver.find_element_by_class_name("login-password")
-    sign_in_btn = driver.find_element_by_id("login-submit")
-
-    # input data then log in
-    print("Inputting credentials...\n")
-    login_email.clear()
-    login_email.send_keys(email)
-    login_password.clear()
-    login_password.send_keys(password)
-    sign_in_btn.click()
+    simulate_login(driver, email, password)
 
     # start searching
     print("Start searching...\n")
-
-    search_bar = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, """//*[@class="ember-text-field ember-view"]""" ))
-    )
-
-    search_bar.clear()
-    search_bar.send_keys(first_name + " " + last_name + " " + region)
-    search_bar.send_keys(Keys.RETURN)
+    star_search(driver, first_name, last_name)
 
     # wait result page to render
     print("Waiting page to render...\n")
-    potential_divs = None
-    try:
-        potential_divs = WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located( (By.XPATH, """//div[@class="search-result__info pt3 pb4 ph0"]""" ) )
-        )
-    except TimeoutException:
-        print("No match!!")
-        return
-
+    potential_divs = wait_result(driver)
     print(str(len(potential_divs)) + " potential candidate entering coarse-grain filter...\n")
-    result_set = set()
+    if len(potential_divs) == 0:
+        return
 
     """
     coarse grain filter
     """
+    result_set = set()
     coarse_filter(potential_divs, result_set, first_name + last_name)
 
     """
