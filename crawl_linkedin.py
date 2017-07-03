@@ -78,7 +78,7 @@ def crawl_linkedin():
     simulate login
     """
     print("Log-in landing page...\n")
-    email = ""
+    email = "371000549@qq.com"
     password = ""
     # automated login process
     login_email = WebDriverWait(driver, 10).until(
