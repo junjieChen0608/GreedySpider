@@ -146,7 +146,7 @@ class LinkedinCrawler:
 
         print("Log-in landing page...\n")
         email = "371000549@qq.com"
-        password = "1313123"
+        password = ""
         self.simulate_login(email, password)
 
         print("Start searching...\n")
