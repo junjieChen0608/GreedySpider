@@ -134,8 +134,9 @@ class LinkedinCrawler:
                     print(major.text)
 
                 # find graduation year
-                grad_year = education.find_element(By.XPATH, "//time[2]")
-                print("graduation year " + grad_year.text + "\n")
+                grad_years = education.find_elements(By.TAG_NAME, "time")
+                if len(grad_years) == 2:
+                    print("graduation year: " + grad_years[1].text + "\n")
             print("----------------------------------------------")
 
     def crawl_linkedin(self):
@@ -146,7 +147,7 @@ class LinkedinCrawler:
 
         print("Log-in landing page...\n")
         email = "371000549@qq.com"
-        password = "1313123"
+        password = ""
         self.simulate_login(email, password)
 
         print("Start searching...\n")
