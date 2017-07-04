@@ -9,6 +9,8 @@ import random
 
 class LinkedinCrawler:
     def __init__(self, first_name, last_name):
+        # TODO handle single search and spread sheet search
+
         self.first_name = first_name.lower()
         self.last_name = last_name.lower()
         self.driver = None
@@ -26,6 +28,7 @@ class LinkedinCrawler:
     """
     def setup_driver(self, page):
         print("\nSetting up web driver...\n")
+        # TODO change your own chrome webdriver path
         chrome_path = r"C:\Zone\ChromeDriver\chromedriver.exe"
         self.driver = webdriver.Chrome(chrome_path)
         self.driver.get(page)
@@ -103,6 +106,7 @@ class LinkedinCrawler:
     fine-grain filter that evaluates accuracy score of all candidate profile links
     """
     def fine_filter(self, result_set):
+        # TODO design scoring mechanism
 
         print("Fine-grain filter: checking " + str(len(result_set)) + " potential profile links...\n")
         for link in result_set:
@@ -147,6 +151,7 @@ class LinkedinCrawler:
 
         print("Log-in landing page...\n")
         email = "371000549@qq.com"
+        # TODO put password here
         password = ""
         self.simulate_login(email, password)
 
@@ -169,3 +174,4 @@ class LinkedinCrawler:
         fine grain filter
         """
         self.fine_filter(result_set)
+        self.driver.close()
