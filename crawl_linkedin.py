@@ -6,32 +6,37 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 import random
 
+
 class LinkedinCrawler:
-
-
     def __init__(self, first_name, last_name):
         self.first_name = first_name.lower()
         self.last_name = last_name.lower()
         self.driver = None
 
-
     """
     randomly pause for few seconds, make it slow and steady
     """
-    def random_pause(self, driver):
+    def random_pause(self):
         random.seed()
         to_pause = random.randint(1, 5)
-        driver.implicitly_wait(to_pause)
+        self.driver.implicitly_wait(to_pause)
 
-
+    """
+    web driver set up
+    """
     def setup_driver(self, page):
         print("\nSetting up web driver...\n")
         chrome_path = r"C:\Zone\ChromeDriver\chromedriver.exe"
         self.driver = webdriver.Chrome(chrome_path)
         self.driver.get(page)
 
-
+    """
+    simulate login
+    """
     def simulate_login(self, email, password):
+        if email == "" or password == "":
+            print("email and password cannot be empty.")
+            raise RuntimeError
 
         # automated login process
         login_email = WebDriverWait(self.driver, 10).until(
@@ -49,7 +54,10 @@ class LinkedinCrawler:
         sign_in_btn.click()
 
 
-    def star_search(self, region="buffalo"):
+    """
+    start searching
+    """
+    def start_search(self, region="buffalo"):
 
         search_bar = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.XPATH, """//*[@class="ember-text-field ember-view"]"""))
@@ -59,12 +67,14 @@ class LinkedinCrawler:
         search_bar.send_keys(self.first_name + " " + self.last_name + " " + region)
         search_bar.send_keys(Keys.RETURN)
 
-
+    """
+    wait result page to render
+    """
     def wait_result(self):
 
         try:
             potential_divs = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_all_elements_located( (By.XPATH, """//div[@class="search-result__info pt3 pb4 ph0"]""" ) )
+                EC.presence_of_all_elements_located((By.XPATH, """//div[@class="search-result__info pt3 pb4 ph0"]"""))
             )
             return potential_divs
         except TimeoutException:
@@ -88,7 +98,6 @@ class LinkedinCrawler:
             if fullname in inner_span_text.lower().replace(" ", ""):
                 result_set.add(profile_link)
         print("Coarse-grain filter: " + str(len(result_set)) + " candidates survived from coarse-grain filter")
-
 
     """
     fine-grain filter that evaluates accuracy score of all candidate profile links
@@ -129,33 +138,20 @@ class LinkedinCrawler:
                 print("graduation year " + grad_year.text + "\n")
             print("----------------------------------------------")
 
-
     def crawl_linkedin(self):
 
-        """
-        web driver set up
-        """
         page = "https://www.linkedin.com"
         self.setup_driver(page)
         print("crawling: " + page + "\n")
 
-        """
-        simulate login
-        """
         print("Log-in landing page...\n")
         email = "371000549@qq.com"
-        password = ""
+        password = "1313123"
         self.simulate_login(email, password)
 
-        """
-        start searching
-        """
         print("Start searching...\n")
-        self.star_search()
+        self.start_search()
 
-        """
-        wait result page to render
-        """
         print("Waiting page to render...\n")
         potential_divs = self.wait_result()
         print(str(len(potential_divs)) + " potential candidate entering coarse-grain filter...\n")
@@ -172,4 +168,3 @@ class LinkedinCrawler:
         fine grain filter
         """
         self.fine_filter(result_set)
-
