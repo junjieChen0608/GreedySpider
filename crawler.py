@@ -1,3 +1,12 @@
+"""
+Please read me if you are a developer
+
+You need to:
+1, No doubt that you need to install Chrome Webdriver and Selenium in order to get the whole program running
+2, change the Chrome Webdriver path to your own path in the setup_driver()
+3, fill in dummy Linkedin account before the call of simulate_login()
+
+"""
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -9,7 +18,6 @@ import random
 
 class LinkedinCrawler:
     def __init__(self, first_name, last_name):
-        # TODO handle single search and spread sheet search
 
         self.first_name = first_name.lower()
         self.last_name = last_name.lower()
@@ -100,7 +108,7 @@ class LinkedinCrawler:
             inner_span_text = inner_span.text
             if fullname in inner_span_text.lower().replace(" ", ""):
                 result_set.add(profile_link)
-        print("Coarse-grain filter: " + str(len(result_set)) + " candidates survived from coarse-grain filter")
+        print(str(len(result_set)) + " candidates survived from coarse-grain filter")
 
     """
     fine-grain filter that evaluates accuracy score of all candidate profile links
@@ -108,9 +116,9 @@ class LinkedinCrawler:
     def fine_filter(self, result_set):
         # TODO design scoring mechanism
 
-        print("Fine-grain filter: checking " + str(len(result_set)) + " potential profile links...\n")
+        print("Checking " + str(len(result_set)) + " potential profile links...\n")
         for link in result_set:
-            print("Clicked: " + link + "\n")
+            print("Clicked: " + link)
             self.driver.get(link)
             score = 0
 
@@ -122,10 +130,10 @@ class LinkedinCrawler:
                                                          """//*[@data-control-name="background_details_school"]"""))
                 )
             except TimeoutException:
-                print("No education data found!!\n----------------------------------------------")
+                print("No education data found!!\n--------------------------------------------------------------------------------------------")
                 continue
 
-            print(str(len(education_info)) + " education data found")
+            print(str(len(education_info)) + " education data found\n")
             for education in education_info:
                 # find school name
                 school = education.find_element(By.TAG_NAME, "h3")
@@ -139,28 +147,19 @@ class LinkedinCrawler:
 
                 # find graduation year
                 grad_years = education.find_elements(By.TAG_NAME, "time")
+                grad_year = ""
                 if len(grad_years) == 2:
-                    print("graduation year: " + grad_years[1].text + "\n")
-            print("----------------------------------------------")
+                    grad_year = grad_years[1].text
+                    print("graduation year: " + grad_year + "\n")
+            print("--------------------------------------------------------------------------------------------")
 
-    def crawl_linkedin(self):
-
-        page = "https://www.linkedin.com"
-        self.setup_driver(page)
-        print("crawling: " + page + "\n")
-
-        print("Log-in landing page...\n")
-        email = "371000549@qq.com"
-        # TODO put password here
-        password = ""
-        self.simulate_login(email, password)
-
+    def crawl_utl(self):
         print("Start searching...\n")
         self.start_search()
 
         print("Waiting page to render...\n")
         potential_divs = self.wait_result()
-        print(str(len(potential_divs)) + " potential candidate entering coarse-grain filter...\n")
+        print(str(len(potential_divs)) + " potential candidate entering coarse-grain filter")
         if len(potential_divs) == 0:
             return
 
@@ -174,4 +173,19 @@ class LinkedinCrawler:
         fine grain filter
         """
         self.fine_filter(result_set)
+
+    def crawl_linkedin(self):
+
+        page = "https://www.linkedin.com"
+        print("crawling: " + page + "\n")
+        self.setup_driver(page)
+
+        print("Log-in landing page...\n")
+        email = "371000549@qq.com"
+        # TODO put password here
+        password = "1313123"
+        self.simulate_login(email, password)
+        self.crawl_utl()
+
+        # finally, close the web browser
         self.driver.close()

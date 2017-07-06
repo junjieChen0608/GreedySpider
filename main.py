@@ -1,4 +1,4 @@
-from crawl_linkedin import LinkedinCrawler
+from crawler import LinkedinCrawler
 
 first_name = input("Please enter first name:")
 last_name = input("Please enter last name:")
