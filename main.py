@@ -1,6 +1,14 @@
 from crawler import LinkedinCrawler
 
-first_name = input("Please enter first name:")
-last_name = input("Please enter last name:")
-myCrawler = LinkedinCrawler(first_name, last_name)
+info_dict = {
+    "firstName" : "",
+    "lastName" : "",
+    "schoolName" : "",
+    "degree" : "",
+    "major" : "",
+    "gradYear" : ""
+}
+info_dict["firstName"] = input("Please enter first name:")
+info_dict["lastName"] = input("Please enter last name:")
+myCrawler = LinkedinCrawler(info_dict, "")
 myCrawler.crawl_linkedin()

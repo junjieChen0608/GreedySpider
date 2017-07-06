@@ -17,10 +17,13 @@ import random
 
 
 class LinkedinCrawler:
-    def __init__(self, first_name, last_name):
-
-        self.first_name = first_name.lower()
-        self.last_name = last_name.lower()
+    def __init__(self, info_dict, file_path):
+        # TODO change constructor signature to a dictionary and a file path string
+        self.first_name = ""
+        self.last_name = ""
+        if file_path == "":
+            self.first_name = info_dict["firstName"]
+            self.last_name = info_dict["lastName"]
         self.driver = None
 
     """
@@ -96,17 +99,18 @@ class LinkedinCrawler:
     populate the result set with coarse-grain filtered result
     for further evaluation, Linkedin occasionally returns irrelevant search results for unknown reason
     """
-    def coarse_filter(self, potential_divs, result_set, fullname):
+    def coarse_filter(self, potential_divs, result_set):
 
         for div in potential_divs:
             inner_anchor = div.find_element(By.TAG_NAME, "a")
             profile_link = inner_anchor.get_attribute("href")
+
             inner_h3 = inner_anchor.find_element(By.TAG_NAME, "h3")
             inner_h3_id = inner_h3.get_attribute("id")
 
             inner_span = inner_anchor.find_element(By.XPATH, "//*[@id=\"" + inner_h3_id + "\"]/span[1]/span")
-            inner_span_text = inner_span.text
-            if fullname in inner_span_text.lower().replace(" ", ""):
+            inner_span_text = inner_span.text.lower().replace(" ", "")
+            if self.first_name in inner_span_text and self.last_name in inner_span_text:
                 result_set.add(profile_link)
         print(str(len(result_set)) + " candidates survived from coarse-grain filter")
 
@@ -117,6 +121,7 @@ class LinkedinCrawler:
         # TODO design scoring mechanism
 
         print("Checking " + str(len(result_set)) + " potential profile links...\n")
+        print("--------------------------------------------------------------------------------------------")
         for link in result_set:
             print("Clicked: " + link)
             self.driver.get(link)
@@ -167,7 +172,7 @@ class LinkedinCrawler:
         coarse grain filter
         """
         result_set = set()
-        self.coarse_filter(potential_divs, result_set, self.first_name + self.last_name)
+        self.coarse_filter(potential_divs, result_set)
 
         """
         fine grain filter
@@ -177,7 +182,7 @@ class LinkedinCrawler:
     def crawl_linkedin(self):
 
         page = "https://www.linkedin.com"
-        print("crawling: " + page + "\n")
+        print("crawling: " + page)
         self.setup_driver(page)
 
         print("Log-in landing page...\n")
@@ -185,7 +190,10 @@ class LinkedinCrawler:
         # TODO put password here
         password = "1313123"
         self.simulate_login(email, password)
+
+        # TODO loop this function if need to do multiple search
         self.crawl_utl()
 
         # finally, close the web browser
         self.driver.close()
+        print("Crawling complete")
