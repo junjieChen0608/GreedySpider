@@ -22,8 +22,8 @@ class LinkedinCrawler:
         self.first_name = ""
         self.last_name = ""
         if file_path == "":
-            self.first_name = info_dict["firstName"]
-            self.last_name = info_dict["lastName"]
+            self.first_name = info_dict["firstName"].lower()
+            self.last_name = info_dict["lastName"].lower()
         self.driver = None
 
     """
